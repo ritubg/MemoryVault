@@ -29,6 +29,8 @@ function Login() {
 
   if (res.status === 200) {
     alert(data.message);
+
+  localStorage.setItem("email", form.email); 
     navigate("/homepage");   
   } else {
     alert(data.message);

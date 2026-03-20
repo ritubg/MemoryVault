@@ -6,6 +6,8 @@ CORS(app)
 
 # In-memory "database"
 users = []
+from datetime import datetime
+capsules = []
 
 # ---------------- SIGNUP ----------------
 @app.route("/signup", methods=["POST"])
@@ -46,5 +48,44 @@ def login():
 def get_users():
     return jsonify(users), 200
 
+@app.route("/add_capsule", methods=["POST"])
+def add_capsule():
+    data = request.form
+
+    capsule = {
+        "name": data.get("name"),
+        "email": data.get("email"),
+        "date_created": datetime.now().strftime("%Y-%m-%d"),
+        "open_date": data.get("open_date"),
+        "notes": data.get("notes"),
+        "letter": data.get("letter")
+    }
+
+    capsules.append(capsule)
+
+    return jsonify({"message": "Capsule created"}), 200
+
+@app.route("/capsules/<email>", methods=["GET"])
+def get_capsules(email):
+    user_capsules = [c for c in capsules if c["email"] == email]
+    return jsonify(user_capsules), 200
+
+@app.route("/open_capsule", methods=["POST"])
+def open_capsule():
+    data = request.json
+
+    name = data.get("name")
+    email = data.get("email")
+
+    for c in capsules:
+        if c["name"] == name and c["email"] == email:
+            today = datetime.now().strftime("%Y-%m-%d")
+
+            if today >= c["open_date"]:
+                return jsonify({"status": "open", "capsule": c})
+            else:
+                return jsonify({"status": "locked", "message": "Too early!"})
+
+    return jsonify({"message": "Capsule not found"}), 404
 if __name__ == "__main__":
     app.run(debug=True)
