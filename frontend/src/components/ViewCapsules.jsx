@@ -1,18 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
   .view-root {
     min-height: 100vh;
-    background: #faf7fc;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-color);
     font-family: 'DM Sans', sans-serif;
-    padding: 40px 24px 60px;
     position: relative;
     overflow-x: hidden;
+  }
+
+  .view-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+    position: relative;
   }
 
   .bg-blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.35; pointer-events: none; }
@@ -347,9 +356,11 @@ function ViewCapsules() {
     <>
       <style>{styles}</style>
       <div className="view-root">
-        <div className="bg-blob blob1" />
-        <div className="bg-blob blob2" />
-        <div className="bg-blob blob3" />
+        <Navbar />
+        <div className="view-content">
+          <div className="bg-blob blob1" />
+          <div className="bg-blob blob2" />
+          <div className="bg-blob blob3" />
 
         <div className="page-header">
           <div>
@@ -446,6 +457,7 @@ function ViewCapsules() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </>
   );

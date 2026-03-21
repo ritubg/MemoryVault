@@ -1,7 +1,7 @@
 /* Timeline.css */
 
 .timeline-page {
-  background: linear-gradient(160deg, #f9f7ff 0%, #F3E4F5 50%, #e8f0ff 100%);
+  background: var(--bg-color);
   min-height: 100vh;
   display: flex;
   flex-direction: column;

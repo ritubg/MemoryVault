@@ -5,11 +5,10 @@ const LOGO_SRC = "/logo.jpeg";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   .auth-root {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: #f8f4fb; font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color); font-family: 'DM Sans', sans-serif;
     position: relative; overflow: hidden; padding: 24px;
   }
 
@@ -109,10 +108,14 @@ function Login() {
     const data = await res.json();
     if (res.status === 200) {
       localStorage.setItem("email", form.email);
+      if (data.user) {
+        localStorage.setItem("mv_user", JSON.stringify(data.user));
+      }
       navigate("/home");
     } else {
       setError(data.message || "Login failed. Please try again.");
     }
+
   };
 
   return (
@@ -125,7 +128,7 @@ function Login() {
             <div className="auth-logo-ring">
               <div className="auth-logo-inner">
                 <img src={LOGO_SRC} alt="Memory Vault" className="auth-logo-img"
-                  onError={e => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.innerHTML='<span style="font-size:32px">✦</span>'; }} />
+                  onError={e => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement.innerHTML = '<span style="font-size:32px">✦</span>'; }} />
               </div>
             </div>
             <div className="auth-brand">MemoryVault</div>

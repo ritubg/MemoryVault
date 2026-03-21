@@ -5,11 +5,12 @@ import Navbar from "./Navbar";
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   .capsule-root {
-    min-height: 100vh;
-    background: #faf7fc;
+    flex: 1;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
     font-family: 'DM Sans', sans-serif;
     display: flex;
     flex-direction: column;
@@ -157,10 +158,10 @@ function Capsule() {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-color)" }}>
       <style>{styles}</style>
-      <div className="capsule-root">
-        <Navbar />
+      <Navbar />
+      <div className="capsule-root" style={{ minHeight: "calc(100vh - 63px)" }}>
         <div className="bg-blob blob1" />
         <div className="bg-blob blob2" />
         <div className="bg-blob blob3" />
@@ -190,7 +191,7 @@ function Capsule() {
           <p className="footer-note">your memories, protected by time</p>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

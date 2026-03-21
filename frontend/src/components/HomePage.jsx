@@ -9,16 +9,31 @@ const LOGO_SRC = "/logo.jpeg";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .hp-root { min-height: 100vh; background: #f8f4fb; font-family: 'DM Sans', sans-serif; position: relative; overflow-x: hidden; }
+  .hp-root { 
+    min-height: 100vh; 
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-color); 
+    font-family: 'DM Sans', sans-serif; 
+    position: relative; 
+    overflow-x: hidden; 
+  }
 
   .hp-blob { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.3; pointer-events: none; z-index: 0; }
   .hp-blob1 { width: 600px; height: 600px; background: #e8daf0; top: -150px; left: -150px; }
   .hp-blob2 { width: 400px; height: 400px; background: #fcdce1; bottom: -80px; right: -80px; }
   .hp-blob3 { width: 300px; height: 300px; background: #c8ceee; top: 38%; left: 58%; }
 
-  .hp-main { max-width: 980px; margin: 0 auto; padding: 52px 24px 80px; position: relative; z-index: 1; }
+  .hp-main { 
+    flex: 1;
+    width: 100%;
+    max-width: 1400px; 
+    margin: 0 auto; 
+    padding: 52px 24px 80px; 
+    position: relative; 
+    z-index: 1; 
+  }
 
   .hp-hero {
     display: flex; flex-direction: column; align-items: center; text-align: center;

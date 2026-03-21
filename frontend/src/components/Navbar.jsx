@@ -16,12 +16,12 @@ const navStyles = `
   }
 
   .navbar-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 28px;
+    width: 100%;
+    padding: 0 40px;
     height: 62px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
 
   .navbar-logo a {
@@ -89,6 +89,7 @@ const navStyles = `
     cursor: pointer;
     transition: all 0.2s;
     margin-left: auto;
+    margin-right: 0;
   }
 
   .logout-button:hover { background: rgba(252,220,225,0.48); color: #8b5f72; }

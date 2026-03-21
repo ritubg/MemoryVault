@@ -5,11 +5,10 @@ const LOGO_SRC = "/logo.jpeg";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   .auth-root {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: #f8f4fb; font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color); font-family: 'DM Sans', sans-serif;
     position: relative; overflow: hidden; padding: 24px;
   }
 

@@ -1,21 +1,30 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
   .add-root {
     min-height: 100vh;
-    background: #faf7fc;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-color);
     font-family: 'DM Sans', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .add-content {
+    flex: 1;
     display: flex;
     align-items: flex-start;
     justify-content: center;
     padding: 40px 16px 60px;
     position: relative;
-    overflow: hidden;
+    width: 100%;
+    margin: 0 auto;
+    max-width: 1400px;
   }
 
   .bg-blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.38; pointer-events: none; }
@@ -283,9 +292,11 @@ function AddCapsule() {
     <>
       <style>{styles}</style>
       <div className="add-root">
-        <div className="bg-blob blob1" />
-        <div className="bg-blob blob2" />
-        <div className="bg-blob blob3" />
+        <Navbar />
+        <div className="add-content">
+          <div className="bg-blob blob1" />
+          <div className="bg-blob blob2" />
+          <div className="bg-blob blob3" />
 
         <div className="form-shell">
           <div className="form-header">
@@ -403,6 +414,7 @@ function AddCapsule() {
             <button className="cancel-btn" onClick={() => navigate("/home/capsule")}>Cancel</button>
             <button className="submit-btn" onClick={handleSubmit}>Seal Capsule</button>
           </div>
+        </div>
         </div>
       </div>
     </>
