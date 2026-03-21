@@ -4,10 +4,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import HomePage from "./components/HomePage";
-import Capsules from "./components/Capsules";
 import Timeline from "./components/Timeline";
 import Summary from "./components/Summary";
 import Profile from "./components/Profile";
+import Capsule from "./components/Capsule";
+import AddCapsule from "./components/AddCapsule";
+import ViewCapsules from "./components/ViewCapsules";
 
 function App() {
   return (
@@ -16,14 +18,15 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        {/* We keep /homepage just in case, but map /home to it as well */}
-        <Route path="/homepage" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/home/capsules" element={<Capsules />} />
         <Route path="/home/timeline" element={<Timeline />} />
         <Route path="/home/summary" element={<Summary />} />
         <Route path="/home/profile" element={<Profile />} />
-      </Routes>
+        <Route path="/homepage" element={<HomePage />} />
+        <Route path="/home/capsule" element={<Capsule />} />
+        <Route path="/add-capsule" element={<AddCapsule />} />
+        <Route path="/view-capsules" element={<ViewCapsules />} />
+        </Routes>
     </Router>
   );
 }
