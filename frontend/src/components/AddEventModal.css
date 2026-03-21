@@ -1,0 +1,233 @@
+/* AddEventModal.css */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(100, 90, 140, 0.3);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-container {
+  background: white;
+  border-radius: 20px;
+  width: 520px;
+  max-width: 95vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 2rem;
+  box-shadow: 0 25px 60px rgba(167, 171, 222, 0.35);
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #4a4a7a;
+  margin: 0;
+}
+
+.modal-close {
+  background: #F3E4F5;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #7a6090;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background: #E8DAF0;
+  transform: rotate(90deg);
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5a577a;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group textarea {
+  border: 1.5px solid #E8DAF0;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fdfcff;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #A7ABDE;
+  background: white;
+}
+
+.input-error {
+  border-color: #f5a0b0 !important;
+}
+
+.error-msg {
+  font-size: 0.78rem;
+  color: #e05070;
+  margin: 0;
+}
+
+.required { color: #e05070; }
+.optional { color: #aaa; font-weight: 400; font-size: 0.8rem; }
+
+/* Media Section */
+.media-section {
+  background: linear-gradient(135deg, #fdfbff, #F3E4F5);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.media-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5a577a;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.8rem 0;
+}
+
+.media-upload-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-image { background: #E8DAF0; color: #6b4a8a; }
+.upload-image:hover { background: #D8BEE5; }
+
+.upload-audio { background: #C8CEEE; color: #3a3a7a; }
+.upload-audio:hover { background: #A7ABDE; color: white; }
+
+.upload-video { background: #FCDCE1; color: #8a3a5a; }
+.upload-video:hover { background: #fcaeb9; }
+
+/* Previews */
+.preview-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.preview-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #D8BEE5;
+}
+
+.preview-audio, .preview-video-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: #5a577a;
+  background: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #D8BEE5;
+}
+
+/* Actions */
+.modal-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.btn-cancel {
+  padding: 0.65rem 1.4rem;
+  border: 2px solid #D8BEE5;
+  border-radius: 10px;
+  background: white;
+  color: #7a6090;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #F3E4F5;
+}
+
+.btn-add {
+  padding: 0.65rem 1.6rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #A7ABDE, #D8BEE5);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(167, 171, 222, 0.4);
+}
+
+.btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(167, 171, 222, 0.5);
+}
