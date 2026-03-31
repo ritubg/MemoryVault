@@ -16,12 +16,12 @@ const navStyles = `
   }
 
   .navbar-container {
-    width: 100%;
-    padding: 0 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 28px;
     height: 62px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
   }
 
   .navbar-logo a {
@@ -62,7 +62,7 @@ const navStyles = `
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 400;
-    color: #000000;
+    color: #a799c4;
     text-decoration: none;
     transition: all 0.2s;
   }
@@ -89,7 +89,6 @@ const navStyles = `
     cursor: pointer;
     transition: all 0.2s;
     margin-left: auto;
-    margin-right: 0;
   }
 
   .logout-button:hover { background: rgba(252,220,225,0.48); color: #8b5f72; }
@@ -128,7 +127,7 @@ const Navbar = () => {
               </Link>
             ))}
           </div>
-          <button className="logout-button" onClick={() => { localStorage.clear(); navigate('/login'); }}>
+          <button className="logout-button" onClick={() => { localStorage.removeItem('email'); localStorage.removeItem('name'); localStorage.removeItem('dob'); navigate('/login'); }}>
             <LogOut size={16} /><span>Logout</span>
           </button>
         </div>

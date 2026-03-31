@@ -108,9 +108,12 @@ function Login() {
     });
     const data = await res.json();
     if (res.status === 200) {
-      if (data.user) {
-        localStorage.setItem("mv_user", JSON.stringify(data.user));
-      }
+      const emailToSave = form.email.trim();
+      localStorage.removeItem('email'); // clear first to avoid any stale value
+      localStorage.setItem("email", emailToSave);
+      localStorage.setItem("name", data.user?.name || "");
+      localStorage.setItem("dob", data.user?.dob || "");
+      console.log('[Login] saved email:', localStorage.getItem('email'));
       navigate("/home");
     } else {
       setError(data.message || "Login failed. Please try again.");

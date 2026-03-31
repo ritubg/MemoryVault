@@ -198,7 +198,75 @@ def open_capsule():
     else:
         return jsonify({"status": "locked", "message": "Too early!"})
 
+from groq import Groq
 
-# ---------------- RUN ----------------
+client_ai = Groq(api_key=os.getenv("GROQ_API_KEY"))
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama3-70b-8192")  # fallback if not set
+
+
+@app.route("/api/summary/<user_email>", methods=["GET"])
+def get_summary(user_email):
+    user_events = list(events_col.find({"user_email": user_email}, {"_id": 0}))
+
+    if not user_events:
+        return jsonify({"summary": "No events found."}), 200
+
+    text_data = ""
+    for e in user_events:
+        text_data += (
+            f"\nEvent: {e.get('event_name', 'Unnamed')}"
+            f"\nDate: {e.get('date', 'Unknown')}"
+            f"\nNotes: {e.get('notes', '').strip() or 'None'}"
+            f"\n---"
+        )
+
+    prompt = f"""You are a thoughtful personal memory assistant.
+Analyse the user's life timeline below and respond with exactly four clearly labelled sections:
+
+## Key Highlights
+List the most significant or memorable events as bullet points.
+
+## Patterns
+Identify any recurring themes, habits, or life patterns as bullet points.
+
+## Insights
+Share meaningful observations or reflections about their journey as bullet points.
+
+## Short Summary
+Write 2-3 warm, personal sentences summarising their timeline as a narrative.
+
+Keep the tone warm, personal, and encouraging. Be concise.
+
+Timeline:
+{text_data}
+"""
+
+    # ── Call Groq ─────────────────────────────────────────────────────────
+    try:
+        response = client_ai.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a warm and insightful personal memory assistant. "
+                        "Always respond with exactly the four sections requested, "
+                        "using ## headings and bullet points where instructed."
+                    )
+                },
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1024,
+        )
+        summary = response.choices[0].message.content
+
+    except Exception as e:
+        print("GROQ ERROR:", e)
+        return jsonify({"message": f"Error generating summary: {str(e)}"}), 500
+
+    return jsonify({"summary": summary}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)
