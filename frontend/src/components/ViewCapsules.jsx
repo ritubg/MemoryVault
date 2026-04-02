@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Lock, Unlock, Image as ImageIcon, Music, Film, Key, ScrollText, Sparkles, AlertCircle } from "lucide-react";
 import Navbar from "./Navbar";
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
 
   .view-root {
     min-height: 100vh;
@@ -177,7 +178,7 @@ const styles = `
   }
   .empty-sub { font-size: 13px; color: #b0a0cc; }
 
-  /* Modal */
+  /* ─── Modal ──────────────────────────────────────────────────── */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -194,13 +195,13 @@ const styles = `
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
   .modal {
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.95);
     backdrop-filter: blur(24px);
     border: 1.5px solid rgba(216,190,229,0.4);
     border-radius: 28px;
-    width: 520px;
+    width: 640px;
     max-width: 100%;
-    max-height: 85vh;
+    max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 24px 80px rgba(74,63,107,0.18);
     animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
@@ -222,7 +223,7 @@ const styles = `
 
   .modal-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 400;
     color: #4a3f6b;
   }
@@ -260,12 +261,24 @@ const styles = `
     flex: 1;
     text-align: center;
   }
-  .chip-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color:   #000000; margin-bottom: 4px; }
+  .chip-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #000000; margin-bottom: 4px; }
   .chip-value { font-size: 13px; color: #000000; font-weight: 500; }
 
-  .content-block {
-    margin-bottom: 20px;
+  /* Section label inside modal */
+  .modal-section-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #b0a0cc;
+    font-weight: 500;
+    margin-bottom: 12px;
+    margin-top: 22px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(216,190,229,0.2);
   }
+  .modal-section-label:first-of-type { margin-top: 0; }
+
+  .content-block { margin-bottom: 20px; }
   .content-label {
     font-size: 10.5px;
     letter-spacing: 0.12em;
@@ -284,6 +297,285 @@ const styles = `
     white-space: pre-wrap;
   }
 
+  /* ─── Media Gallery ────────────────────────────────────────────── */
+  .media-gallery-section { margin-bottom: 20px; }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .photo-grid img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1.5px solid rgba(216,190,229,0.3);
+    transition: transform 0.2s;
+    cursor: zoom-in;
+  }
+  .photo-grid img:hover { transform: scale(1.03); }
+
+  .audio-player-wrap {
+    margin-bottom: 10px;
+    background: rgba(200,206,238,0.1);
+    border: 1px solid rgba(200,206,238,0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .audio-player-wrap span { font-size: 12.5px; color: #6a7aad; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .audio-player-wrap audio { flex: 2; height: 32px; }
+
+  .video-player-wrap {
+    margin-bottom: 10px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1.5px solid rgba(216,190,229,0.3);
+  }
+  .video-player-wrap video {
+    width: 100%;
+    display: block;
+    max-height: 280px;
+    background: #000;
+  }
+
+  /* ─── Lightbox ─────────────────────────────────────────────────── */
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    animation: fadeIn 0.18s ease;
+  }
+  .lightbox-overlay img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  }
+  .lightbox-close {
+    position: fixed;
+    top: 22px;
+    right: 26px;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,0.3); }
+
+  /* ─── Vintage Scroll Letter ──────────────────────────────────── */
+  .scroll-section { margin-top: 6px; margin-bottom: 20px; }
+
+  .scroll-trigger {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1.5px dashed rgba(180,140,90,0.35);
+    background: rgba(245,230,200,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-trigger::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(245,230,200,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .scroll-trigger:hover { transform: translateY(-2px); background: rgba(245,230,200,0.22); border-color: rgba(180,140,90,0.55); }
+
+  .scroll-icon-wrap {
+    position: relative;
+    width: 72px;
+    height: 72px;
+  }
+  .scroll-icon-svg {
+    width: 72px;
+    height: 72px;
+    filter: drop-shadow(0 4px 12px rgba(139,100,50,0.3));
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .scroll-trigger:hover .scroll-icon-svg { transform: scale(1.08) rotate(-2deg); }
+
+  .wax-seal {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 28px;
+    height: 28px;
+    background: radial-gradient(circle at 35% 35%, #d4544a, #8b2020);
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    box-shadow: 0 2px 8px rgba(139,32,32,0.4);
+    color: rgba(255,255,255,0.9);
+  }
+
+  .scroll-hint {
+    font-size: 13px;
+    color: #8b6a3a;
+    letter-spacing: 0.03em;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+  }
+  .scroll-hint-sub {
+    font-size: 11px;
+    color: #b0a0cc;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* The unrolling animation container */
+  .scroll-letter-container {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform-origin: top center;
+    transform: scaleY(0.85);
+    transition:
+      max-height 0.7s cubic-bezier(0.22,1,0.36,1),
+      opacity 0.5s ease 0.1s,
+      transform 0.6s cubic-bezier(0.22,1,0.36,1);
+  }
+  .scroll-letter-container.open {
+    max-height: 1200px;
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  /* Parchment paper */
+  .parchment {
+    margin-top: 16px;
+    background:
+      linear-gradient(180deg,
+        rgba(205,170,105,0.18) 0%,
+        rgba(245,230,200,0.92) 4%,
+        rgba(245,230,200,0.92) 96%,
+        rgba(180,140,75,0.22) 100%
+      ),
+      repeating-linear-gradient(
+        180deg,
+        transparent,
+        transparent 26px,
+        rgba(180,140,75,0.06) 27px
+      );
+    border: 1.5px solid rgba(180,140,75,0.45);
+    border-radius: 4px 4px 8px 8px;
+    padding: 32px 36px 36px;
+    position: relative;
+    box-shadow:
+      0 4px 24px rgba(139,100,50,0.15),
+      inset 0 0 40px rgba(180,140,75,0.06);
+  }
+
+  /* Rolled top edge */
+  .parchment::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    right: 8px;
+    height: 16px;
+    background: linear-gradient(180deg, rgba(205,170,105,0.6) 0%, rgba(225,195,135,0.9) 50%, rgba(205,170,105,0.5) 100%);
+    border-radius: 4px 4px 0 0;
+    border: 1px solid rgba(180,140,75,0.4);
+    box-shadow: 0 -2px 8px rgba(139,100,50,0.2);
+  }
+  /* Rolled bottom edge */
+  .parchment::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 8px;
+    right: 8px;
+    height: 16px;
+    background: linear-gradient(0deg, rgba(205,170,105,0.6) 0%, rgba(225,195,135,0.9) 50%, rgba(205,170,105,0.5) 100%);
+    border-radius: 0 0 4px 4px;
+    border: 1px solid rgba(180,140,75,0.4);
+    box-shadow: 0 2px 8px rgba(139,100,50,0.2);
+  }
+
+  .parchment-heading {
+    font-family: 'IM Fell English', 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-style: italic;
+    color: rgba(100,70,30,0.6);
+    text-align: center;
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(180,140,75,0.25);
+  }
+
+  .parchment-text {
+    font-family: 'IM Fell English', 'Cormorant Garamond', serif;
+    font-size: 16px;
+    line-height: 2.0;
+    color: #3a2808;
+    white-space: pre-wrap;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .parchment-footer {
+    margin-top: 24px;
+    text-align: right;
+    font-family: 'IM Fell English', 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: rgba(100,70,30,0.55);
+    border-top: 1px solid rgba(180,140,75,0.2);
+    padding-top: 12px;
+  }
+
+  /* Collapse button */
+  .scroll-collapse-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+    font-size: 12px;
+    color: #b0a0cc;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+    padding: 8px;
+    width: 100%;
+  }
+  .scroll-collapse-btn:hover { color: #8b7aad; }
+
+  /* ─── Locked state ──────────────────────────────────────────── */
   .locked-state {
     text-align: center;
     padding: 32px 20px;
@@ -301,8 +593,38 @@ const styles = `
     .grid { grid-template-columns: 1fr; }
     .modal-header, .modal-body { padding: 20px; }
     .info-row { flex-direction: column; }
+    .parchment { padding: 24px 20px 28px; }
   }
 `;
+
+// ── Scroll SVG icon ─────────────────────────────────────────────
+function ScrollIcon() {
+  return (
+    <svg className="scroll-icon-svg" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Main scroll body */}
+      <rect x="10" y="14" width="60" height="52" rx="4" fill="url(#parchmentGrad)" stroke="#b89050" strokeWidth="1.5" />
+      {/* Top rolled edge */}
+      <rect x="8" y="10" width="64" height="12" rx="6" fill="url(#rollGrad)" stroke="#b89050" strokeWidth="1.2" />
+      {/* Bottom rolled edge */}
+      <rect x="8" y="58" width="64" height="12" rx="6" fill="url(#rollGrad)" stroke="#b89050" strokeWidth="1.2" />
+      {/* Lines representing text */}
+      <line x1="20" y1="32" x2="60" y2="32" stroke="#b89050" strokeWidth="1" strokeOpacity="0.5" />
+      <line x1="20" y1="40" x2="60" y2="40" stroke="#b89050" strokeWidth="1" strokeOpacity="0.5" />
+      <line x1="20" y1="48" x2="50" y2="48" stroke="#b89050" strokeWidth="1" strokeOpacity="0.5" />
+      <defs>
+        <linearGradient id="parchmentGrad" x1="10" y1="14" x2="70" y2="66" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#f5e6c8" />
+          <stop offset="100%" stopColor="#e8d0a0" />
+        </linearGradient>
+        <linearGradient id="rollGrad" x1="8" y1="10" x2="72" y2="22" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#d4a855" />
+          <stop offset="50%" stopColor="#f0cc80" />
+          <stop offset="100%" stopColor="#c49040" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
 
 function ViewCapsules() {
   const navigate = useNavigate();
@@ -310,6 +632,8 @@ function ViewCapsules() {
   const [selected, setSelected] = useState(null);
   const [capsuleData, setCapsuleData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [scrollOpen, setScrollOpen] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -327,6 +651,7 @@ function ViewCapsules() {
 
   const openCapsule = async (capsule) => {
     setSelected(capsule);
+    setScrollOpen(false);
     const user = JSON.parse(localStorage.getItem("mv_user") || "{}");
     if (today >= capsule.open_date) {
       const res = await fetch("http://localhost:5001/open_capsule", {
@@ -342,15 +667,15 @@ function ViewCapsules() {
     }
   };
 
-  const closeModal = () => { setSelected(null); setCapsuleData(null); };
+  const closeModal = () => { setSelected(null); setCapsuleData(null); setScrollOpen(false); };
 
   const isUnlocked = (c) => today >= c.open_date;
 
   const formatDate = (d) => {
     if (!d) return "—";
     const [y, m, day] = d.split("-");
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${months[parseInt(m) - 1]} ${parseInt(day)}, ${y}`;
   };
 
   const daysUntil = (d) => {
@@ -358,9 +683,95 @@ function ViewCapsules() {
     return diff > 0 ? `Opens in ${diff} day${diff === 1 ? "" : "s"}` : "Ready to open";
   };
 
+  // ── Render media gallery ─────────────────────────────────────
+  const renderMedia = (media) => {
+    if (!media) return null;
+    const hasImages = media.images?.length > 0;
+    const hasAudio = media.audio?.length > 0;
+    const hasVideo = media.video?.length > 0;
+    if (!hasImages && !hasAudio && !hasVideo) return null;
+
+    return (
+      <div className="media-gallery-section">
+        <div className="modal-section-label">Media</div>
+
+        {hasImages && (
+          <div className="photo-grid">
+            {media.images.map((img, i) => (
+              <img
+                key={i}
+                src={img.data || img}
+                alt={img.name || `Photo ${i + 1}`}
+                onClick={() => setLightboxSrc(img.data || img)}
+              />
+            ))}
+          </div>
+        )}
+
+        {hasAudio && media.audio.map((a, i) => (
+          <div className="audio-player-wrap" key={i}>
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Music size={14} /> {a.name || `Audio ${i + 1}`}</span>
+            <audio controls src={a.data || a} />
+          </div>
+        ))}
+
+        {hasVideo && media.video.map((v, i) => (
+          <div className="video-player-wrap" key={i}>
+            <video controls src={v.data || v} />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // ── Render vintage scroll letter ─────────────────────────────
+  const renderScrollLetter = (letter, dateCreated) => {
+    if (!letter) return null;
+    return (
+      <div className="scroll-section">
+        <div className="modal-section-label">Letter to Future Self</div>
+
+        {/* Click trigger when closed */}
+        {!scrollOpen && (
+          <div className="scroll-trigger" onClick={() => setScrollOpen(true)}>
+            <div className="scroll-icon-wrap">
+              <ScrollIcon />
+              <div className="wax-seal"><Sparkles size={12} /></div>
+            </div>
+            <div className="scroll-hint">A letter awaits you…</div>
+            <div className="scroll-hint-sub">Click the scroll to unseal it</div>
+          </div>
+        )}
+
+        {/* Animated letter reveal */}
+        <div className={`scroll-letter-container ${scrollOpen ? "open" : ""}`}>
+          <div className="parchment">
+            <div className="parchment-heading">~ A Letter to My Future Self ~</div>
+            <div className="parchment-text">{letter}</div>
+            <div className="parchment-footer">
+              Written on {formatDate(dateCreated)}
+            </div>
+          </div>
+          <button className="scroll-collapse-btn" onClick={() => setScrollOpen(false)}>
+            ↑ Roll up the scroll
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <style>{styles}</style>
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <div className="lightbox-overlay" onClick={() => setLightboxSrc(null)}>
+          <button className="lightbox-close" onClick={() => setLightboxSrc(null)}>✕</button>
+          <img src={lightboxSrc} alt="Full size" onClick={e => e.stopPropagation()} />
+        </div>
+      )}
+
       <div className="view-root">
         <Navbar />
         <div className="view-content">
@@ -368,101 +779,121 @@ function ViewCapsules() {
           <div className="bg-blob blob2" />
           <div className="bg-blob blob3" />
 
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">My Capsules</h1>
-            <p className="page-subtitle">{capsules.length} sealed {capsules.length === 1 ? "memory" : "memories"} waiting</p>
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">My Capsules</h1>
+              <p className="page-subtitle">{capsules.length} sealed {capsules.length === 1 ? "memory" : "memories"} waiting</p>
+            </div>
+            <button className="add-btn" onClick={() => navigate("/add-capsule")} style={{ display: "flex", alignItems: "center", gap: "6px" }}><Sparkles size={16} /> New Capsule</button>
           </div>
-          <button className="add-btn" onClick={() => navigate("/add-capsule")}>✦ New Capsule</button>
-        </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", paddingTop: 60, color: "#c4b8d8", position: "relative", zIndex: 2 }}>Loading…</div>
-        ) : capsules.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">✦</div>
-            <div className="empty-title">No capsules yet</div>
-            <p className="empty-sub">Create your first one to seal a memory in time</p>
-          </div>
-        ) : (
-          <div className="grid">
-            {capsules.map((c, i) => (
-              <div className="capsule-card" key={i} onClick={() => openCapsule(c)}>
-                <div className={`card-badge ${isUnlocked(c) ? "badge-open" : "badge-locked"}`}>
-                  {isUnlocked(c) ? "✦ Unlocked" : "🔒 Sealed"}
-                </div>
-                <div className="card-name">{c.name}</div>
-                <div className="card-meta">
-                  <div className="meta-row"><span className="meta-icon"></span> Created {formatDate(c.date_created)}</div>
-                  <div className="meta-row"><span className="meta-icon">🗝</span> Opens {formatDate(c.open_date)}</div>
-                </div>
-                <div className="card-footer">
-                  <span className="open-hint">{daysUntil(c.open_date)}</span>
-                  <span className="card-arrow">→</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {selected && (
-          <div className="modal-overlay" onClick={e => e.target === e.currentTarget && closeModal()}>
-            <div className="modal">
-              <div className="modal-header">
-                <div>
-                  <div className="modal-title">{selected.name}</div>
-                  <div style={{ marginTop: 6 }}>
-                    <span className={`card-badge ${isUnlocked(selected) ? "badge-open" : "badge-locked"}`} style={{ marginBottom: 0 }}>
-                      {isUnlocked(selected) ? "✦ Unlocked" : "🔒 Sealed"}
-                    </span>
+          {loading ? (
+            <div style={{ textAlign: "center", paddingTop: 60, color: "#c4b8d8", position: "relative", zIndex: 2 }}>Loading…</div>
+          ) : capsules.length === 0 ? (
+            <div className="empty-state">
+              {/* <div className="empty-icon"><Sparkles size={48} color="#c8ceee" /></div> */}
+              <div className="empty-title">No capsules yet</div>
+              <p className="empty-sub">Create your first one to seal a memory in time</p>
+            </div>
+          ) : (
+            <div className="grid">
+              {capsules.map((c, i) => (
+                <div className="capsule-card" key={i} onClick={() => openCapsule(c)}>
+                  <div className={`card-badge ${isUnlocked(c) ? "badge-open" : "badge-locked"}`}>
+                    {isUnlocked(c) ? <><Unlock size={12} /> Unlocked</> : <><Lock size={12} /> Sealed</>}
                   </div>
-                </div>
-                <button className="modal-close" onClick={closeModal}>✕</button>
-              </div>
-
-              <div className="modal-body">
-                <div className="info-row">
-                  <div className="info-chip">
-                    <div className="chip-label">Created</div>
-                    <div className="chip-value">{formatDate(selected.date_created)}</div>
-                  </div>
-                  <div className="info-chip">
-                    <div className="chip-label">Opens On</div>
-                    <div className="chip-value">{formatDate(selected.open_date)}</div>
-                  </div>
-                </div>
-
-                {isUnlocked(selected) && capsuleData ? (
-                  <>
-                    {capsuleData.notes && (
-                      <div className="content-block">
-                        <div className="content-label">Notes</div>
-                        <div className="content-text">{capsuleData.notes}</div>
+                  <div className="card-name">{c.name}</div>
+                  <div className="card-meta">
+                    <div className="meta-row"><span className="meta-icon"></span> Created {formatDate(c.date_created)}</div>
+                    <div className="meta-row"><span className="meta-icon"><Key size={13} /></span> Opens {formatDate(c.open_date)}</div>
+                    {(c.media?.images?.length > 0 || c.media?.audio?.length > 0 || c.media?.video?.length > 0) && (
+                      <div className="meta-row" style={{ marginTop: 4 }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          {c.media?.images?.length > 0 && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><ImageIcon size={13} /> {c.media.images.length}</span>}
+                          {c.media?.audio?.length > 0 && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Music size={13} /> {c.media.audio.length}</span>}
+                          {c.media?.video?.length > 0 && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Film size={13} /> {c.media.video.length}</span>}
+                        </span>
                       </div>
                     )}
-                    {capsuleData.letter && (
-                      <div className="content-block">
-                        <div className="content-label">Letter</div>
-                        <div className="content-text">{capsuleData.letter}</div>
+                    {c.letter && (
+                      <div className="meta-row" style={{ marginTop: 2 }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}><ScrollText size={13} /> Letter included</span>
                       </div>
                     )}
-                    {!capsuleData.notes && !capsuleData.letter && (
-                      <div style={{ textAlign: "center", color: "#c4b8d8", fontSize: 13, padding: "20px 0" }}>
-                        No written content in this capsule.
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="locked-state">
-                    <div className="locked-icon">🔒</div>
-                    <div className="locked-msg">This capsule is sealed</div>
-                    <div className="locked-sub">It will unlock on {formatDate(selected.open_date)}</div>
                   </div>
-                )}
+                  <div className="card-footer">
+                    <span className="open-hint">{daysUntil(c.open_date)}</span>
+                    <span className="card-arrow">→</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ── Capsule Modal ── */}
+          {selected && (
+            <div className="modal-overlay" onClick={e => e.target === e.currentTarget && closeModal()}>
+              <div className="modal">
+                <div className="modal-header">
+                  <div>
+                    <div className="modal-title">{selected.name}</div>
+                    <div style={{ marginTop: 6 }}>
+                      <span className={`card-badge ${isUnlocked(selected) ? "badge-open" : "badge-locked"}`} style={{ marginBottom: 0 }}>
+                        {isUnlocked(selected) ? <><Unlock size={12} /> Unlocked</> : <><Lock size={12} /> Sealed</>}
+                      </span>
+                    </div>
+                  </div>
+                  <button className="modal-close" onClick={closeModal}>✕</button>
+                </div>
+
+                <div className="modal-body">
+                  {/* Date chips */}
+                  <div className="info-row">
+                    <div className="info-chip">
+                      <div className="chip-label">Created</div>
+                      <div className="chip-value">{formatDate(selected.date_created)}</div>
+                    </div>
+                    <div className="info-chip">
+                      <div className="chip-label">Opens On</div>
+                      <div className="chip-value">{formatDate(selected.open_date)}</div>
+                    </div>
+                  </div>
+
+                  {isUnlocked(selected) && capsuleData ? (
+                    <>
+                      {/* Notes */}
+                      {capsuleData.notes && (
+                        <div className="content-block">
+                          <div className="modal-section-label">Notes</div>
+                          <div className="content-text">{capsuleData.notes}</div>
+                        </div>
+                      )}
+
+                      {/* Media */}
+                      {renderMedia(capsuleData.media)}
+
+                      {/* Scroll letter */}
+                      {capsuleData.letter && renderScrollLetter(capsuleData.letter, capsuleData.date_created)}
+
+                      {/* Empty state if nothing */}
+                      {!capsuleData.notes && !capsuleData.letter &&
+                        (!capsuleData.media?.images?.length && !capsuleData.media?.audio?.length && !capsuleData.media?.video?.length) && (
+                          <div style={{ textAlign: "center", color: "#c4b8d8", fontSize: 13, padding: "20px 0" }}>
+                            No content in this capsule.
+                          </div>
+                        )}
+                    </>
+                  ) : (
+                    <div className="locked-state">
+                      <div className="locked-icon" style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}><Lock size={36} color="#c48a9e" /></div>
+                      <div className="locked-msg">This capsule is sealed</div>
+                      <div className="locked-sub">It will unlock on {formatDate(selected.open_date)}</div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
       </div>
     </>

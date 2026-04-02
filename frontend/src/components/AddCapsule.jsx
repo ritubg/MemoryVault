@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Image as ImageIcon, Music, Film, Sparkles } from "lucide-react";
 import Navbar from "./Navbar";
 
 const styles = `
@@ -181,6 +182,45 @@ const styles = `
   .pill-remove { cursor: pointer; color: #c4b8d8; font-size: 13px; line-height: 1; }
   .pill-remove:hover { color: #8b7aad; }
 
+  /* Media preview thumbnails */
+  .media-preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .media-thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1.5px solid rgba(216,190,229,0.4);
+  }
+  .audio-preview-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(200,206,238,0.25);
+    border: 1px solid rgba(200,206,238,0.5);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: #6a7aad;
+    cursor: default;
+  }
+  .video-preview-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(252,220,225,0.25);
+    border: 1px solid rgba(252,220,225,0.5);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: #ad6a7a;
+    cursor: default;
+  }
+
   .form-footer {
     border-top: 1px solid rgba(216,190,229,0.2);
     padding: 24px 48px;
@@ -219,6 +259,7 @@ const styles = `
   }
   .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(167,171,222,0.5); }
   .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
   .success-banner {
     background: linear-gradient(135deg, rgba(216,190,229,0.25), rgba(200,206,238,0.2));
@@ -244,47 +285,65 @@ const styles = `
   }
 `;
 
+// Convert a File to { name, data (base64 dataURI), type }
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ name: file.name, data: reader.result, type: file.type });
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 function AddCapsule() {
   const navigate = useNavigate();
   const photoRef = useRef();
   const audioRef = useRef();
   const videoRef = useRef();
 
-  const [form, setForm] = useState({
-    name: "",
-    open_date: "",
-    notes: "",
-    letter: ""
-  });
-  const [photos, setPhotos] = useState([]);
+  const [form, setForm] = useState({ name: "", open_date: "", notes: "", letter: "" });
+  const [photos, setPhotos] = useState([]); // [{name, data, type}]
   const [audios, setAudios] = useState([]);
   const [videos, setVideos] = useState([]);
   const [success, setSuccess] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
-
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const addFiles = (setter, e) => {
+  const addFiles = async (setter, e) => {
     const files = Array.from(e.target.files);
-    setter(prev => [...prev, ...files]);
+    const converted = await Promise.all(files.map(fileToBase64));
+    setter(prev => [...prev, ...converted]);
   };
 
   const removeFile = (setter, idx) => setter(prev => prev.filter((_, i) => i !== idx));
 
   const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("open_date", form.open_date);
-    formData.append("notes", form.notes);
-    formData.append("letter", form.letter);
-    const user = JSON.parse(localStorage.getItem("mv_user") || "{}");
-    formData.append("email", user.email);
-    photos.forEach(f => formData.append("photos", f));
-    audios.forEach(f => formData.append("audios", f));
-    videos.forEach(f => formData.append("videos", f));
+    if (!form.name || !form.open_date) return;
+    setUploading(true);
 
-    await fetch("http://localhost:5001/add_capsule", { method: "POST", body: formData });
+    const user = JSON.parse(localStorage.getItem("mv_user") || "{}");
+
+    const payload = {
+      name: form.name,
+      open_date: form.open_date,
+      notes: form.notes,
+      letter: form.letter,
+      email: user.email,
+      media: {
+        images: photos,
+        audio: audios,
+        video: videos,
+      },
+    };
+
+    await fetch("http://localhost:5001/add_capsule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    setUploading(false);
     setSuccess(true);
     setTimeout(() => navigate("/home/capsule"), 1600);
   };
@@ -299,123 +358,130 @@ function AddCapsule() {
           <div className="bg-blob blob2" />
           <div className="bg-blob blob3" />
 
-        <div className="form-shell">
-          <div className="form-header">
-            <span className="header-icon">✦</span>
-            <div>
-              <div className="form-title">New Time Capsule</div>
-              <div className="form-tagline">Seal your memories</div>
-            </div>
-            <button className="back-btn" onClick={() => navigate("/home/capsule")}>← Back</button>
-          </div>
-
-          <div className="form-body">
-            {success && (
-              <div className="success-banner">
-                <span></span> Capsule sealed! Redirecting you…
-              </div>
-            )}
-
-            <div className="section-label">Capsule Details</div>
-
-            <div className="field-row">
-              <label className="field-label">Capsule Name <span className="required">*</span></label>
-              <input className="field-input" name="name" placeholder="e.g. Summer 2025 Memories" value={form.name} onChange={handleChange} />
-            </div>
-
-            <div className="field-row">
-              <label className="field-label">Date Created</label>
-              <input className="field-input" type="date" value={today} disabled style={{ opacity: 0.5 }} />
-            </div>
-
-            <div className="field-row">
-              <label className="field-label">Date to Open <span className="required">*</span></label>
-              <input className="field-input" name="open_date" type="date" min={today} value={form.open_date} onChange={handleChange} />
-            </div>
-
-            <div className="section-label">Contents</div>
-
-            <div className="field-row">
-              <label className="field-label">Notes / Comments</label>
-              <textarea className="field-textarea" name="notes" placeholder="Write anything you want to remember…" value={form.notes} onChange={handleChange} style={{ minHeight: 80 }} />
-            </div>
-
-            <div className="field-row">
-              <label className="field-label">Letter</label>
-              <textarea className="field-textarea" name="letter" placeholder="Dear future me…" value={form.letter} onChange={handleChange} style={{ minHeight: 120 }} />
-            </div>
-
-            <div className="section-label">Media Attachments</div>
-
-            <div className="field-row">
-              <label className="field-label">Photos</label>
+          <div className="form-shell">
+            <div className="form-header">
               <div>
-                <div className="upload-zone" onClick={() => photoRef.current.click()}>
-                  <div className="upload-icon">🖼</div>
-                  <div className="upload-text"><strong>Click to add photos</strong><br />JPG, PNG, GIF</div>
-                  <input ref={photoRef} type="file" accept="image/*" multiple hidden onChange={e => addFiles(setPhotos, e)} />
+                <div className="form-title">New Time Capsule</div>
+                <div className="form-tagline">Seal your memories</div>
+              </div>
+              <button className="back-btn" onClick={() => navigate("/home/capsule")}>← Back</button>
+            </div>
+
+            <div className="form-body">
+              {success && (
+                <div className="success-banner">
+                  <Sparkles size={16} /> Capsule sealed! Redirecting you…
                 </div>
-                {photos.length > 0 && (
-                  <div className="file-pills">
-                    {photos.map((f, i) => (
-                      <div className="file-pill" key={i}>
-                        🖼 {f.name.length > 20 ? f.name.slice(0, 18) + "…" : f.name}
-                        <span className="pill-remove" onClick={() => removeFile(setPhotos, i)}>×</span>
-                      </div>
-                    ))}
+              )}
+
+              <div className="section-label">Capsule Details</div>
+
+              <div className="field-row">
+                <label className="field-label">Capsule Name <span className="required">*</span></label>
+                <input className="field-input" name="name" placeholder="e.g. Summer 2025 Memories" value={form.name} onChange={handleChange} />
+              </div>
+
+              <div className="field-row">
+                <label className="field-label">Date Created</label>
+                <input className="field-input" type="date" value={today} disabled style={{ opacity: 0.5 }} />
+              </div>
+
+              <div className="field-row">
+                <label className="field-label">Date to Open <span className="required">*</span></label>
+                <input className="field-input" name="open_date" type="date" min={today} value={form.open_date} onChange={handleChange} />
+              </div>
+
+              <div className="section-label">Contents</div>
+
+              <div className="field-row">
+                <label className="field-label">Notes / Comments</label>
+                <textarea className="field-textarea" name="notes" placeholder="Write anything you want to remember…" value={form.notes} onChange={handleChange} style={{ minHeight: 80 }} />
+              </div>
+
+              <div className="field-row">
+                <label className="field-label">Letter to Future Self</label>
+                <textarea className="field-textarea" name="letter" placeholder="Dear future me…" value={form.letter} onChange={handleChange} style={{ minHeight: 120 }} />
+              </div>
+
+              <div className="section-label">Media Attachments</div>
+
+              {/* Photos */}
+              <div className="field-row">
+                <label className="field-label">Photos</label>
+                <div>
+                  <div className="upload-zone" onClick={() => photoRef.current.click()}>
+                    <div className="upload-icon"><ImageIcon size={22} /></div>
+                    <div className="upload-text"><strong>Click to add photos</strong><br />JPG, PNG, GIF</div>
+                    <input ref={photoRef} type="file" accept="image/*" multiple hidden onChange={e => addFiles(setPhotos, e)} />
                   </div>
-                )}
+                  {photos.length > 0 && (
+                    <div className="media-preview-grid">
+                      {photos.map((f, i) => (
+                        <div key={i} style={{ position: "relative" }}>
+                          <img src={f.data} alt={f.name} className="media-thumb" />
+                          <span
+                            onClick={() => removeFile(setPhotos, i)}
+                            style={{ position: "absolute", top: -6, right: -6, background: "#fff", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 11, border: "1px solid #d8bee5", color: "#8b7aad" }}
+                          >×</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Audio */}
+              <div className="field-row">
+                <label className="field-label">Audio</label>
+                <div>
+                  <div className="upload-zone" onClick={() => audioRef.current.click()}>
+                    <div className="upload-icon"><Music size={22} /></div>
+                    <div className="upload-text"><strong>Click to add audio</strong><br />MP3, WAV, M4A</div>
+                    <input ref={audioRef} type="file" accept="audio/*" multiple hidden onChange={e => addFiles(setAudios, e)} />
+                  </div>
+                  {audios.length > 0 && (
+                    <div className="file-pills" style={{ marginTop: 10 }}>
+                      {audios.map((f, i) => (
+                        <div className="audio-preview-pill" key={i}>
+                          <Music size={14} style={{ marginRight: 4 }} /> {f.name.length > 22 ? f.name.slice(0, 20) + "…" : f.name}
+                          <span className="pill-remove" onClick={() => removeFile(setAudios, i)}>×</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Video */}
+              <div className="field-row">
+                <label className="field-label">Video</label>
+                <div>
+                  <div className="upload-zone" onClick={() => videoRef.current.click()}>
+                    <div className="upload-icon"><Film size={22} /></div>
+                    <div className="upload-text"><strong>Click to add video</strong><br />MP4, MOV, AVI</div>
+                    <input ref={videoRef} type="file" accept="video/*" multiple hidden onChange={e => addFiles(setVideos, e)} />
+                  </div>
+                  {videos.length > 0 && (
+                    <div className="file-pills" style={{ marginTop: 10 }}>
+                      {videos.map((f, i) => (
+                        <div className="video-preview-pill" key={i}>
+                          <Film size={14} style={{ marginRight: 4 }} /> {f.name.length > 22 ? f.name.slice(0, 20) + "…" : f.name}
+                          <span className="pill-remove" onClick={() => removeFile(setVideos, i)}>×</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="field-row">
-              <label className="field-label">Audio</label>
-              <div>
-                <div className="upload-zone" onClick={() => audioRef.current.click()}>
-                  <div className="upload-icon">🎵</div>
-                  <div className="upload-text"><strong>Click to add audio</strong><br />MP3, WAV, M4A</div>
-                  <input ref={audioRef} type="file" accept="audio/*" multiple hidden onChange={e => addFiles(setAudios, e)} />
-                </div>
-                {audios.length > 0 && (
-                  <div className="file-pills">
-                    {audios.map((f, i) => (
-                      <div className="file-pill" key={i}>
-                        🎵 {f.name.length > 20 ? f.name.slice(0, 18) + "…" : f.name}
-                        <span className="pill-remove" onClick={() => removeFile(setAudios, i)}>×</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="field-row">
-              <label className="field-label">Video</label>
-              <div>
-                <div className="upload-zone" onClick={() => videoRef.current.click()}>
-                  <div className="upload-icon">🎬</div>
-                  <div className="upload-text"><strong>Click to add video</strong><br />MP4, MOV, AVI</div>
-                  <input ref={videoRef} type="file" accept="video/*" multiple hidden onChange={e => addFiles(setVideos, e)} />
-                </div>
-                {videos.length > 0 && (
-                  <div className="file-pills">
-                    {videos.map((f, i) => (
-                      <div className="file-pill" key={i}>
-                        🎬 {f.name.length > 20 ? f.name.slice(0, 18) + "…" : f.name}
-                        <span className="pill-remove" onClick={() => removeFile(setVideos, i)}>×</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="form-footer">
+              <button className="cancel-btn" onClick={() => navigate("/home/capsule")}>Cancel</button>
+              <button className="submit-btn" onClick={handleSubmit} disabled={uploading || success}>
+                {uploading ? "Sealing…" : <span style={{ display: "flex", alignItems: "center", gap: 6 }}>Seal Capsule</span>}
+              </button>
             </div>
           </div>
-
-          <div className="form-footer">
-            <button className="cancel-btn" onClick={() => navigate("/home/capsule")}>Cancel</button>
-            <button className="submit-btn" onClick={handleSubmit}>Seal Capsule</button>
-          </div>
-        </div>
         </div>
       </div>
     </>

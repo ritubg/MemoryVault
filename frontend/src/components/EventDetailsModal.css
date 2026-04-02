@@ -1,0 +1,240 @@
+/* EventDetailsModal.css */
+.event-details-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 58, 106, 0.4);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.event-details-modal {
+  background: white;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: slideUpFade 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.event-modal-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  color: #a0a0c0;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.event-modal-close:hover {
+  background: #f5f5fa;
+  color: #3d3a6a;
+}
+
+.event-modal-header {
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 1px solid #f0f0f5;
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+}
+
+.event-dob-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #FCDCE1, #E8DAF0);
+  color: #b06080;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.event-modal-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #3d3a6a;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+}
+
+.event-modal-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #8a89a8;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.event-modal-body {
+  padding: 1.5rem 2rem 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.event-modal-section {
+  margin-bottom: 2rem;
+}
+
+.event-modal-section:last-child {
+  margin-bottom: 0;
+}
+
+.event-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #a0a0c0;
+  margin-bottom: 0.75rem;
+}
+
+.event-notes-content {
+  color: #4a4a6a;
+  line-height: 1.7;
+  font-size: 1.05rem;
+  white-space: pre-wrap;
+  background: #f8f8fb;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid #f0f0f5;
+}
+
+.event-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.event-media-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: zoom-in;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #f0f0f5;
+}
+
+.event-media-photo:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-media-audio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.event-audio-wrapper {
+  background: #f8f8fb;
+  border: 1px solid #f0f0f5;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.event-audio-wrapper span {
+  font-size: 0.9rem;
+  color: #4a4a6a;
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-audio-wrapper audio {
+  height: 36px;
+  flex: 2;
+}
+
+.event-media-video-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.event-video-player {
+  width: 100%;
+  border-radius: 12px;
+  background: #000;
+  max-height: 360px;
+}
+
+/* Lightbox styles */
+.event-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.15s ease;
+}
+
+.event-lightbox-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.event-lightbox-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.event-lightbox-close:hover {
+  background: rgba(255,255,255,0.4);
+}

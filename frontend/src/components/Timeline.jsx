@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Plus, Baby, Star } from "lucide-react";
+import { Plus, Baby, Star, Image as ImageIcon, Music, Film, FileText, Maximize2 } from "lucide-react";
 import Navbar from "./Navbar";
 import AddEventModal from "./AddEventModal";
+import EventDetailsModal from "./EventDetailsModal";
 import { getEvents, addEvent } from "../services/timelineService";
 import "./Timeline.css";
 
@@ -20,6 +21,7 @@ const COLOR_COUNT = 6;
 function Timeline() {
   const [events, setEvents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingEvent, setViewingEvent] = useState(null);
   const [user, setUser] = useState(null);
 
   const initialized = useRef(false);
@@ -47,7 +49,7 @@ function Timeline() {
         id: `dob_${parsedUser.email}`,
         event_name: "Date of Birth",
         date: new Date(parsedUser.dob).toISOString(),
-        notes: `Welcome to your life story, ${parsedUser.name || ""}! 🌟`,
+        notes: `Welcome to your life story, ${parsedUser.name || ""}!`,
         media: { images: [], audio: [], video: [] },
         is_dob: true,
       };
@@ -64,29 +66,20 @@ function Timeline() {
     setEvents(updated);
   };
 
-  const renderMediaInCard = (media) => {
-    if (!media) return null;
-    const hasMedia =
-      media.images?.length > 0 ||
-      media.audio?.length > 0 ||
-      media.video?.length > 0;
-    if (!hasMedia) return null;
+  const renderMediaInCard = (media, notes) => {
+    const hasImages = media?.images?.length > 0;
+    const hasAudio = media?.audio?.length > 0;
+    const hasVideo = media?.video?.length > 0;
+    const hasNotes = !!notes;
+
+    if (!hasImages && !hasAudio && !hasVideo && !hasNotes) return null;
 
     return (
-      <div className="card-media">
-        {media.images?.length > 0 && (
-          <div className="card-media-images">
-            {media.images.slice(0, 3).map((img, i) => (
-              <img key={i} src={img.data} alt={img.name} className="card-thumb" title={img.name} />
-            ))}
-          </div>
-        )}
-        {media.audio?.map((a, i) => (
-          <audio key={i} controls className="card-audio-player" src={a.data} />
-        ))}
-        {media.video?.slice(0, 1).map((v, i) => (
-          <video key={i} controls className="card-video-player" src={v.data} />
-        ))}
+      <div className="card-indicators">
+        {hasNotes && <span className="indicator-icon" title="Has notes"><FileText size={14} /></span>}
+        {hasImages && <span className="indicator-pill"><ImageIcon size={13} /> {media.images.length}</span>}
+        {hasAudio && <span className="indicator-pill"><Music size={13} /> {media.audio.length}</span>}
+        {hasVideo && <span className="indicator-pill"><Film size={13} /> {media.video.length}</span>}
       </div>
     );
   };
@@ -128,12 +121,12 @@ function Timeline() {
                     className={`timeline-item ${isAbove ? "above" : "below"}`}
                   >
                     {/* Card (above or below based on index parity) */}
-                    <div className={`event-card ${colorClass}`}>
+                    <div className={`event-card ${colorClass}`} onClick={() => setViewingEvent(event)}>
+                      <div className="card-hover-icon"><Maximize2 size={16} /></div>
                       {event.is_dob && <span className="dob-badge">Date of Birth</span>}
                       <div className="card-date">{formatDate(event.date)}</div>
                       <h3 className="card-name">{event.event_name}</h3>
-                      {event.notes && <p className="card-notes">{event.notes}</p>}
-                      {renderMediaInCard(event.media)}
+                      {renderMediaInCard(event.media, event.notes)}
                     </div>
 
                     {/* Connector between card and node */}
@@ -157,6 +150,13 @@ function Timeline() {
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddEvent}
         userDob={user?.dob}
+      />
+
+      {/* View Event Details Modal */}
+      <EventDetailsModal
+        isOpen={!!viewingEvent}
+        onClose={() => setViewingEvent(null)}
+        event={viewingEvent}
       />
     </div>
   );

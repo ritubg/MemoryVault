@@ -224,14 +224,25 @@ def delete_event(user_email, event_id):
 # ---------------- CAPSULES ----------------
 @app.route("/add_capsule", methods=["POST"])
 def add_capsule():
-    data = request.form
+    data = request.json
+    if not data:
+        return jsonify({"message": "No data provided"}), 400
+
+    raw_media = data.get("media", {})
+    processed_media = {
+        "images": [process_media_item(img) for img in raw_media.get("images", [])],
+        "audio":  [process_media_item(a)   for a   in raw_media.get("audio", [])],
+        "video":  [process_media_item(v)   for v   in raw_media.get("video", [])],
+    }
+
     capsule = {
-        "name": data.get("name"),
-        "email": data.get("email"),
+        "name":         data.get("name"),
+        "email":        data.get("email"),
         "date_created": datetime.now().strftime("%Y-%m-%d"),
-        "open_date": data.get("open_date"),
-        "notes": data.get("notes"),
-        "letter": data.get("letter")
+        "open_date":    data.get("open_date"),
+        "notes":        data.get("notes", ""),
+        "letter":       data.get("letter", ""),
+        "media":        processed_media,
     }
     capsules_col.insert_one(capsule)
     return jsonify({"message": "Capsule created"}), 200
