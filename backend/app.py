@@ -2,17 +2,48 @@ import os
 import uuid
 import base64
 import boto3
+import logging
+from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
+# ---------------- LOGGING CONFIG ----------------
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Create handlers
+c_handler = logging.StreamHandler()
+f_handler = RotatingFileHandler("app.log", maxBytes=1000000, backupCount=5)
+c_handler.setLevel(logging.INFO)
+f_handler.setLevel(logging.INFO)
+
+# Create formatters and add it to handlers
+log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+c_handler.setFormatter(log_format)
+f_handler.setFormatter(log_format)
+
+# Add handlers to the logger
+logger.addHandler(c_handler)
+logger.addHandler(f_handler)
+logger.propagate = False # Avoid duplicate logs if basicConfig is already set
+
 # ---------------- INIT ----------------
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+@app.before_request
+def log_request_info():
+    logger.info(f"Incoming Request: {request.method} {request.path} from {request.remote_addr}")
+
+@app.after_request
+def log_response_info(response):
+    logger.info(f"Response: {response.status_code} for {request.method} {request.path}")
+    return response
 
 # ---------------- DB CONNECTION ----------------
 MONGO_URI = os.getenv("MONGO_URI")
@@ -54,13 +85,13 @@ except Exception:
             }
         )
     except Exception as e:
-        print("Could not create bucket:", e)
+        logger.error(f"Could not create bucket: {e}")
 
 def process_media_item(item):
     if not isinstance(item, dict) or not item.get("data"):
         return item
     if not item["data"].startswith("data:"):
-        return item # Already URL or raw text
+        return item 
 
     try:
         header, base64_str = item["data"].split(",", 1)
@@ -87,7 +118,7 @@ def process_media_item(item):
             "type": mime_type
         }
     except Exception as e:
-        print("S3 Upload error:", e)
+        logger.error(f"S3 Upload error: {e}")
         return item
 
 # ---------------- AUTH ----------------
@@ -107,6 +138,7 @@ def signup():
     }
 
     users_col.insert_one(user)
+    logger.info(f"New user signed up: {email}")
     return jsonify({"message": "Signup successful"}), 200
 
 
@@ -122,11 +154,13 @@ def login():
     )
 
     if user:
+        logger.info(f"User logged in: {email}")
         return jsonify({
             "message": "Login successful",
             "user": user
         }), 200
 
+    logger.warning(f"Failed login attempt for: {email}")
     return jsonify({"message": "Invalid credentials"}), 401
 
 
@@ -210,6 +244,7 @@ def add_event(user_email):
         {"$set": event},
         upsert=True
     )
+    logger.info(f"Event {event_id} saved for user {user_email}")
     return jsonify({"message": "Event saved", "event": event}), 201
 
 
@@ -245,6 +280,7 @@ def add_capsule():
         "media":        processed_media,
     }
     capsules_col.insert_one(capsule)
+    logger.info(f"Capsule created for user {data.get('email')}")
     return jsonify({"message": "Capsule created"}), 200
 
 
@@ -338,7 +374,7 @@ Timeline:
         summary = response.choices[0].message.content
 
     except Exception as e:
-        print("GROQ ERROR:", e)
+        logger.error(f"GROQ ERROR: {e}")
         return jsonify({"message": f"Error generating summary: {str(e)}"}), 500
 
     return jsonify({"summary": summary}), 200
