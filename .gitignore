@@ -22,6 +22,8 @@ instance/
 
 # ---------------- LOGS ----------------
 *.log
+backend/app.log
+backend/app.log.*
 
 # ---------------- OS FILES ----------------
 .DS_Store
@@ -39,3 +41,4 @@ build/
 # ---------------- MISC ----------------
 *.swp
 *.bak
+volume/

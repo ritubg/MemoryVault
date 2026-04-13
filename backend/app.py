@@ -36,6 +36,8 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+logger.info("Server starting up — MemoryVault backend initialised")
+
 @app.before_request
 def log_request_info():
     logger.info(f"Incoming Request: {request.method} {request.path} from {request.remote_addr}")
@@ -175,7 +177,9 @@ def get_users():
 def get_profile(email):
     user = users_col.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
+        logger.warning(f"Profile not found for email: {email}")
         return jsonify({"message": "User not found"}), 404
+    logger.info(f"Profile fetched for: {email}")
     return jsonify(user), 200
 
 
@@ -187,25 +191,31 @@ def change_password():
     new_password = data.get("new_password")
 
     if not email or not current_password or not new_password:
+        logger.warning(f"Change-password request missing fields for: {email}")
         return jsonify({"message": "All fields required"}), 400
 
     if len(new_password) < 8:
+        logger.warning(f"Change-password rejected — new password too short for: {email}")
         return jsonify({"message": "Password must be >= 8 chars"}), 400
 
     user = users_col.find_one({"email": email})
     if not user:
+        logger.warning(f"Change-password: user not found for: {email}")
         return jsonify({"message": "User not found"}), 404
 
     if user["password"] != current_password:
+        logger.warning(f"Change-password: incorrect current password for: {email}")
         return jsonify({"message": "Incorrect current password"}), 401
 
     if current_password == new_password:
+        logger.warning(f"Change-password: new password same as current for: {email}")
         return jsonify({"message": "New password must differ"}), 400
 
     users_col.update_one(
         {"email": email},
         {"$set": {"password": new_password}}
     )
+    logger.info(f"Password changed successfully for: {email}")
     return jsonify({"message": "Password updated"}), 200
 
 
@@ -252,7 +262,9 @@ def add_event(user_email):
 def delete_event(user_email, event_id):
     result = events_col.delete_one({"id": event_id, "user_email": user_email})
     if result.deleted_count:
+        logger.info(f"Event {event_id} deleted for user {user_email}")
         return jsonify({"message": "Deleted"}), 200
+    logger.warning(f"Delete attempted on non-existent event {event_id} for user {user_email}")
     return jsonify({"message": "Not found"}), 404
 
 
@@ -302,12 +314,15 @@ def open_capsule():
     )
 
     if not capsule:
+        logger.warning(f"Capsule not found: name='{name}' email={email}")
         return jsonify({"message": "Not found"}), 404
 
     today = datetime.now().strftime("%Y-%m-%d")
     if today >= capsule["open_date"]:
+        logger.info(f"Capsule '{name}' opened by {email}")
         return jsonify({"status": "open", "capsule": capsule})
     else:
+        logger.info(f"Capsule '{name}' is still locked for {email} (opens {capsule['open_date']})")
         return jsonify({"status": "locked", "message": "Too early!"})
 
 from groq import Groq
@@ -321,6 +336,7 @@ def get_summary(user_email):
     user_events = list(events_col.find({"user_email": user_email}, {"_id": 0}))
 
     if not user_events:
+        logger.info(f"Summary requested for {user_email} — no events found")
         return jsonify({"summary": "No events found."}), 200
 
     text_data = ""
@@ -372,9 +388,10 @@ Timeline:
             max_tokens=1024,
         )
         summary = response.choices[0].message.content
+        logger.info(f"Summary generated for {user_email} — {len(user_events)} event(s) analysed")
 
     except Exception as e:
-        logger.error(f"GROQ ERROR: {e}")
+        logger.error(f"GROQ ERROR for {user_email}: {e}")
         return jsonify({"message": f"Error generating summary: {str(e)}"}), 500
 
     return jsonify({"summary": summary}), 200

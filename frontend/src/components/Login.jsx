@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import logger from "../services/logger";
 
 const LOGO_SRC = "/logo.jpeg";
 
@@ -101,6 +102,7 @@ function Login() {
 
   const handleSubmit = async () => {
     setError("");
+    logger.info('Login', 'Login attempt', { email: form.email });
     const res = await fetch("http://localhost:5001/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -109,9 +111,10 @@ function Login() {
     const data = await res.json();
     if (res.status === 200) {
       localStorage.setItem("mv_user", JSON.stringify(data.user || {}));
-      console.log('[Login] saved user info');
+      logger.info('Login', 'Login successful', { email: form.email });
       navigate("/home");
     } else {
+      logger.warn('Login', 'Login failed', { email: form.email, reason: data.message });
       setError(data.message || "Login failed. Please try again.");
     }
   };

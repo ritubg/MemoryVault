@@ -1,5 +1,6 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import logger from "./services/logger";
 
 import Login from "./components/Login";
 import Signup from "./components/Signup";
@@ -11,9 +12,22 @@ import Capsule from "./components/Capsule";
 import AddCapsule from "./components/AddCapsule";
 import ViewCapsules from "./components/ViewCapsules";
 
+function RouteLogger() {
+  const location = useLocation();
+  useEffect(() => {
+    logger.info('App', 'Route changed', location.pathname);
+  }, [location.pathname]);
+  return null;
+}
+
 function App() {
+  useEffect(() => {
+    logger.info('App', 'MemoryVault application mounted');
+  }, []);
+
   return (
     <Router>
+      <RouteLogger />
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />

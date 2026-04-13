@@ -1,6 +1,8 @@
 // timelineService.js
 // Backend API adapter for timeline events (MongoDB via Flask backend).
 
+import logger from './logger';
+
 const API_URL = "http://127.0.0.1:5001/api/events";
 
 /**
@@ -15,7 +17,7 @@ export const getEvents = async (userEmail) => {
     const events = data.events || [];
     return events.sort((a, b) => new Date(a.date) - new Date(b.date));
   } catch (err) {
-    console.error("Error fetching events:", err);
+    logger.error('timelineService', 'Error fetching events', err.message);
     return [];
   }
 };
@@ -31,10 +33,10 @@ export const addEvent = async (userEmail, event) => {
       body: JSON.stringify(event),
     });
     if (!res.ok) {
-      console.error("Failed to add event:", await res.text());
+      logger.error('timelineService', 'Failed to add event (non-ok response)', res.status);
     }
   } catch (err) {
-    console.error("Error adding event:", err);
+    logger.error('timelineService', 'Error adding event', err.message);
   }
   return await getEvents(userEmail);
 };
@@ -47,9 +49,9 @@ export const deleteEvent = async (userEmail, eventId) => {
     const res = await fetch(`${API_URL}/${userEmail}/${eventId}`, {
       method: "DELETE",
     });
-    if (!res.ok) console.error("Failed to delete event");
+    if (!res.ok) logger.error('timelineService', 'Failed to delete event (non-ok response)', res.status);
   } catch (err) {
-    console.error("Error deleting event:", err);
+    logger.error('timelineService', 'Error deleting event', err.message);
   }
   return await getEvents(userEmail);
 };
@@ -58,5 +60,5 @@ export const deleteEvent = async (userEmail, eventId) => {
  * Clear all events for a user.
  */
 export const clearEvents = async (_userEmail) => {
-  console.warn("clearEvents not fully implemented on server yet.");
+  logger.warn('timelineService', 'clearEvents not fully implemented on server yet');
 };

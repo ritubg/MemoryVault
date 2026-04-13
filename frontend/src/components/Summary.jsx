@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './Navbar';
+import logger from '../services/logger';
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap');
@@ -314,8 +315,8 @@ const Summary = () => {
     const storedUser = localStorage.getItem('mv_user');
     const user = storedUser ? JSON.parse(storedUser) : {};
     const email = user.email || '';
-    console.log('[Summary] email from mv_user:', JSON.stringify(email));
-    if (!email) { setStatus('error'); return; }
+    logger.info('Summary', 'Fetch requested', { email });
+    if (!email) { logger.warn('Summary', 'No user email found — aborting fetch'); setStatus('error'); return; }
 
     setStatus('loading');
     setRawText('');
@@ -326,6 +327,7 @@ const Summary = () => {
       const data = await res.json();
 
       if (!res.ok) {
+        logger.error('Summary', 'Fetch returned non-ok status', res.status);
         setStatus('error');
         return;
       }
@@ -333,18 +335,21 @@ const Summary = () => {
       const text = data.summary || '';
 
       if (text === 'No events found.' || text.trim() === '') {
+        logger.info('Summary', 'No events to summarise', { email });
         setStatus('empty');
         return;
       }
 
       setRawText(text);
       setSections(parseSections(text));
+      logger.info('Summary', 'Summary received and parsed', { email });
       setStatus('done');
 
       // Smooth scroll to output
       setTimeout(() => outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 
-    } catch {
+    } catch (err) {
+      logger.error('Summary', 'Fetch threw an exception', err.message);
       setStatus('error');
     }
   };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Unlock, Image as ImageIcon, Music, Film, Key, ScrollText, Sparkles, AlertCircle } from "lucide-react";
 import Navbar from "./Navbar";
+import logger from "../services/logger";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
@@ -640,10 +641,17 @@ function ViewCapsules() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("mv_user") || "{}");
     if (user.email) {
+      logger.info('ViewCapsules', 'Loading capsules', { email: user.email });
       fetch(`http://localhost:5001/capsules/${user.email}`)
         .then(res => res.json())
-        .then(data => { setCapsules(data); setLoading(false); })
-        .catch(() => setLoading(false));
+        .then(data => {
+          logger.info('ViewCapsules', 'Capsules loaded', { count: data.length });
+          setCapsules(data); setLoading(false);
+        })
+        .catch((err) => {
+          logger.error('ViewCapsules', 'Failed to load capsules', err.message);
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -653,6 +661,7 @@ function ViewCapsules() {
     setSelected(capsule);
     setScrollOpen(false);
     const user = JSON.parse(localStorage.getItem("mv_user") || "{}");
+    logger.info('ViewCapsules', 'Attempting to open capsule', { name: capsule.name, openDate: capsule.open_date });
     if (today >= capsule.open_date) {
       const res = await fetch("http://localhost:5001/open_capsule", {
         method: "POST",
@@ -660,9 +669,15 @@ function ViewCapsules() {
         body: JSON.stringify({ name: capsule.name, email: user.email })
       });
       const data = await res.json();
-      if (data.status === "open") setCapsuleData(data.capsule);
-      else setCapsuleData(null);
+      if (data.status === "open") {
+        logger.info('ViewCapsules', 'Capsule opened', { name: capsule.name });
+        setCapsuleData(data.capsule);
+      } else {
+        logger.info('ViewCapsules', 'Capsule is locked', { name: capsule.name });
+        setCapsuleData(null);
+      }
     } else {
+      logger.info('ViewCapsules', 'Capsule still locked (client-side check)', { name: capsule.name, openDate: capsule.open_date });
       setCapsuleData(null);
     }
   };
