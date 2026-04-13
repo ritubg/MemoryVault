@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import AddEventModal from "./AddEventModal";
 import EventDetailsModal from "./EventDetailsModal";
 import { getEvents, addEvent } from "../services/timelineService";
+import logger from "../services/logger";
 import "./Timeline.css";
 
 // Formats an ISO date string to "dd-mm-yyyy"
@@ -40,11 +41,13 @@ function Timeline() {
   }, []);
 
   const initializeTimeline = async (parsedUser) => {
+    logger.info('Timeline', 'Loading events', { email: parsedUser.email });
     const existing = await getEvents(parsedUser.email);
 
     // If no DOB event exists yet, auto-insert it
     const hasDobEvent = existing.some((e) => e.is_dob);
     if (!hasDobEvent && parsedUser.dob) {
+      logger.info('Timeline', 'Inserting DOB event', { email: parsedUser.email });
       const dobEvent = {
         id: `dob_${parsedUser.email}`,
         event_name: "Date of Birth",
@@ -56,13 +59,16 @@ function Timeline() {
       const updated = await addEvent(parsedUser.email, dobEvent);
       setEvents(updated);
     } else {
+      logger.info('Timeline', 'Events loaded', { count: existing.length });
       setEvents(existing);
     }
   };
 
   const handleAddEvent = async (newEvent) => {
     if (!user) return;
+    logger.info('Timeline', 'Adding event', { email: user.email, event: newEvent.event_name });
     const updated = await addEvent(user.email, newEvent);
+    logger.info('Timeline', 'Event added', { total: updated.length });
     setEvents(updated);
   };
 

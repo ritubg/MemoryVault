@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import logger from "../services/logger";
 
 const LOGO_SRC = "/logo.jpeg";
 
@@ -109,12 +110,18 @@ function Signup() {
 
   const handleSubmit = async () => {
     setError("");
+    logger.info('Signup', 'Signup attempt', { email: form.email });
     const formData = new FormData();
     Object.entries(form).forEach(([k, v]) => { if (v) formData.append(k, v); });
     const res = await fetch("http://localhost:5001/signup", { method:"POST", body:formData });
     const data = await res.json();
-    if (res.status === 200) navigate("/login");
-    else setError(data.message || "Signup failed.");
+    if (res.status === 200) {
+      logger.info('Signup', 'Signup successful', { email: form.email });
+      navigate("/login");
+    } else {
+      logger.warn('Signup', 'Signup failed', { email: form.email, reason: data.message });
+      setError(data.message || "Signup failed.");
+    }
   };
 
   return (

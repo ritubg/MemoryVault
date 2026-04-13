@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Image as ImageIcon, Music, Film, Sparkles } from "lucide-react";
 import Navbar from "./Navbar";
+import logger from "../services/logger";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
@@ -323,6 +324,7 @@ function AddCapsule() {
     setUploading(true);
 
     const user = JSON.parse(localStorage.getItem("mv_user") || "{}");
+    logger.info('AddCapsule', 'Submitting capsule', { name: form.name, email: user.email });
 
     const payload = {
       name: form.name,
@@ -337,11 +339,17 @@ function AddCapsule() {
       },
     };
 
-    await fetch("http://localhost:5001/add_capsule", {
+    const res = await fetch("http://localhost:5001/add_capsule", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+
+    if (res.ok) {
+      logger.info('AddCapsule', 'Capsule created successfully', { name: form.name });
+    } else {
+      logger.error('AddCapsule', 'Capsule creation failed', res.status);
+    }
 
     setUploading(false);
     setSuccess(true);

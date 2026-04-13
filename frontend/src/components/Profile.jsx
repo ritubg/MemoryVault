@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import Navbar from './Navbar';
 import { useEffect } from "react";
+import logger from "../services/logger";
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -429,15 +430,19 @@ const Profile = () => {
   // Fetch full profile from API on mount
   useEffect(() => {
     if (email) {
+      logger.info('Profile', 'Fetching profile', { email });
       fetch(`http://localhost:5001/profile/${email}`)
         .then(res => res.json())
         .then(data => {
           if (!data.message) {
+            logger.info('Profile', 'Profile fetched successfully', { email });
             setUser(data);
             localStorage.setItem('mv_user', JSON.stringify(data));
+          } else {
+            logger.warn('Profile', 'Profile fetch returned a message', { email, message: data.message });
           }
         })
-        .catch(err => console.error("Error fetching profile:", err));
+        .catch(err => logger.error('Profile', 'Error fetching profile', err.message));
     }
   }, [email]);
 
@@ -505,6 +510,7 @@ const Profile = () => {
     if (pw.next !== pw.confirm) return setPwErr('New passwords do not match.');
 
     setBusy(true);
+    logger.info('Profile', 'Password change attempt', { email });
     try {
       const res = await fetch('http://localhost:5001/change_password', {
         method: 'POST',
@@ -512,9 +518,15 @@ const Profile = () => {
         body: JSON.stringify({ email, current_password: pw.current, new_password: pw.next }),
       });
       const data = await res.json();
-      if (res.ok) { closePwModal(); showToast('Password updated successfully'); }
-      else setPwErr(data.message || 'Something went wrong.');
+      if (res.ok) {
+        logger.info('Profile', 'Password changed successfully', { email });
+        closePwModal(); showToast('Password updated successfully');
+      } else {
+        logger.warn('Profile', 'Password change failed', { email, reason: data.message });
+        setPwErr(data.message || 'Something went wrong.');
+      }
     } catch {
+      logger.error('Profile', 'Password change request threw an exception', { email });
       setPwErr('Could not connect to the server.');
     }
     setBusy(false);
